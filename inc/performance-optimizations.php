@@ -94,9 +94,11 @@ add_filter( 'style_loader_src', 'maupassant_remove_query_strings', 15, 1 );
 
 /**
  * Enable Gzip compression
+ * Note: Only enable if your server doesn't already have Gzip enabled
  */
 function maupassant_enable_gzip_compression() {
-	if ( ! ini_get( 'zlib.output_compression' ) && 'ob_gzhandler' !== ini_get( 'output_handler' ) ) {
+	// Check if we're not in admin and Gzip is not already enabled
+	if ( ! is_admin() && ! ini_get( 'zlib.output_compression' ) && 'ob_gzhandler' !== ini_get( 'output_handler' ) ) {
 		if ( extension_loaded( 'zlib' ) ) {
 			@ini_set( 'zlib.output_compression', 'On' );
 			@ini_set( 'zlib.output_compression_level', '6' );
@@ -107,14 +109,18 @@ add_action( 'init', 'maupassant_enable_gzip_compression' );
 
 /**
  * Add browser caching headers
+ * Note: Disabled by default as it may conflict with caching plugins
+ * Uncomment if you want to enable it
  */
+/*
 function maupassant_add_cache_headers() {
-	if ( ! is_admin() ) {
+	if ( ! is_admin() && ! headers_sent() ) {
 		header( 'Cache-Control: public, max-age=31536000' );
 		header( 'Expires: ' . gmdate( 'D, d M Y H:i:s', time() + 31536000 ) . ' GMT' );
 	}
 }
 add_action( 'send_headers', 'maupassant_add_cache_headers' );
+*/
 
 /**
  * Optimize database queries

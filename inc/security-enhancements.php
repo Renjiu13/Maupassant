@@ -27,7 +27,7 @@ add_filter( 'style_loader_src', 'maupassant_remove_wp_version_strings' );
  * Add security headers
  */
 function maupassant_add_security_headers() {
-	if ( ! is_admin() ) {
+	if ( ! is_admin() && ! headers_sent() ) {
 		// Prevent clickjacking
 		header( 'X-Frame-Options: SAMEORIGIN' );
 		
@@ -40,9 +40,10 @@ function maupassant_add_security_headers() {
 		// Referrer policy
 		header( 'Referrer-Policy: strict-origin-when-cross-origin' );
 		
-		// Content Security Policy (basic)
-		$csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;";
-		header( "Content-Security-Policy: $csp" );
+		// Content Security Policy (basic) - Disabled by default as it may break some plugins
+		// Uncomment if you want to enable it
+		// $csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;";
+		// header( "Content-Security-Policy: $csp" );
 		
 		// Permissions Policy
 		header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
@@ -188,7 +189,10 @@ add_filter( 'wp_handle_upload_prefilter', 'maupassant_validate_file_upload' );
 
 /**
  * Disable directory browsing
+ * Note: This function is disabled by default to prevent file permission issues
+ * Uncomment if you want to enable it
  */
+/*
 function maupassant_disable_directory_browsing() {
 	$htaccess_file = ABSPATH . '.htaccess';
 	if ( file_exists( $htaccess_file ) && is_writable( $htaccess_file ) ) {
@@ -200,6 +204,7 @@ function maupassant_disable_directory_browsing() {
 	}
 }
 add_action( 'admin_init', 'maupassant_disable_directory_browsing' );
+*/
 
 /**
  * Secure cookies
@@ -240,7 +245,10 @@ function maupassant_escape_output( $output ) {
 
 /**
  * Prevent hotlinking
+ * Note: This function is disabled by default to prevent file permission issues
+ * Uncomment if you want to enable it
  */
+/*
 function maupassant_prevent_hotlinking() {
 	$htaccess_file = ABSPATH . '.htaccess';
 	if ( file_exists( $htaccess_file ) && is_writable( $htaccess_file ) ) {
@@ -259,6 +267,7 @@ function maupassant_prevent_hotlinking() {
 	}
 }
 add_action( 'admin_init', 'maupassant_prevent_hotlinking' );
+*/
 
 /**
  * Add security audit log
