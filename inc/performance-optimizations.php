@@ -2,14 +2,22 @@
 /**
  * Performance Optimizations
  * Improves site speed, caching, and resource loading
+ * 
+ * @package Maupassant
+ * @version 1.2
  */
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Preload critical resources
  */
 function maupassant_preload_resources() {
 	// Preload main stylesheet
-	echo '<link rel="preload" href="' . esc_url( get_stylesheet_uri() ) . '" as="style">';
+	printf( '<link rel="preload" href="%s" as="style">' . "\n", esc_url( get_stylesheet_uri() ) );
 	
 	// Preload critical CSS files
 	$critical_css = array(
@@ -20,35 +28,45 @@ function maupassant_preload_resources() {
 	);
 	
 	foreach ( $critical_css as $css_file ) {
-		echo '<link rel="preload" href="' . esc_url( get_template_directory_uri() . '/css/' . $css_file ) . '" as="style">';
+		printf( '<link rel="preload" href="%s" as="style">' . "\n", esc_url( get_template_directory_uri() . '/css/' . $css_file ) );
 	}
 	
 	// DNS prefetch for external resources
-	echo '<link rel="dns-prefetch" href="//fonts.googleapis.com">';
-	echo '<link rel="dns-prefetch" href="//www.google-analytics.com">';
+	echo '<link rel="dns-prefetch" href="//fonts.googleapis.com">' . "\n";
+	echo '<link rel="dns-prefetch" href="//www.google-analytics.com">' . "\n";
 }
 add_action( 'wp_head', 'maupassant_preload_resources', 1 );
 
 /**
  * Defer non-critical CSS
+ * DISABLED by default - can cause FOUC (Flash of Unstyled Content)
  */
 function maupassant_defer_non_critical_css() {
+	// Only enable if explicitly requested
+	if ( ! apply_filters( 'maupassant_defer_non_critical_css', false ) ) {
+		return;
+	}
 	?>
 	<script>
 	// Load non-critical CSS asynchronously
-	function loadDeferredStyles() {
-		var addStylesNode = document.getElementById("deferred-styles");
-		if (addStylesNode) {
-			var replacement = document.createElement("div");
-			replacement.innerHTML = addStylesNode.textContent;
-			document.body.appendChild(replacement);
-			addStylesNode.parentElement.removeChild(addStylesNode);
+	(function() {
+		function loadDeferredStyles() {
+			var addStylesNode = document.getElementById("deferred-styles");
+			if (addStylesNode) {
+				var replacement = document.createElement("div");
+				replacement.innerHTML = addStylesNode.textContent;
+				document.body.appendChild(replacement);
+				addStylesNode.parentElement.removeChild(addStylesNode);
+			}
 		}
-	}
-	var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-		window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-	if (raf) raf(function() { window.setTimeout(loadDeferredStyles, 0); });
-	else window.addEventListener('load', loadDeferredStyles);
+		var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+			window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+		if (raf) {
+			raf(function() { window.setTimeout(loadDeferredStyles, 0); });
+		} else {
+			window.addEventListener('load', loadDeferredStyles);
+		}
+	})();
 	</script>
 	<?php
 }
@@ -95,13 +113,20 @@ add_filter( 'style_loader_src', 'maupassant_remove_query_strings', 15, 1 );
 /**
  * Enable Gzip compression
  * Note: Only enable if your server doesn't already have Gzip enabled
+ * DISABLED by default - use server-level Gzip configuration instead
  */
 function maupassant_enable_gzip_compression() {
+	// Disabled to prevent conflicts with server configuration and output buffering
+	// To enable, add: add_filter( 'maupassant_enable_gzip', '__return_true' );
+	if ( ! apply_filters( 'maupassant_enable_gzip', false ) ) {
+		return;
+	}
+	
 	// Check if we're not in admin and Gzip is not already enabled
 	if ( ! is_admin() && ! ini_get( 'zlib.output_compression' ) && 'ob_gzhandler' !== ini_get( 'output_handler' ) ) {
-		if ( extension_loaded( 'zlib' ) ) {
-			@ini_set( 'zlib.output_compression', 'On' );
-			@ini_set( 'zlib.output_compression_level', '6' );
+		if ( extension_loaded( 'zlib' ) && ! headers_sent() ) {
+			ini_set( 'zlib.output_compression', 'On' );
+			ini_set( 'zlib.output_compression_level', '6' );
 		}
 	}
 }
@@ -144,12 +169,17 @@ add_action( 'init', 'maupassant_optimize_queries' );
  * Lazy load images
  */
 function maupassant_add_lazy_loading( $content ) {
-	if ( is_feed() || is_preview() ) {
+	if ( is_feed() || is_preview() || empty( $content ) ) {
 		return $content;
 	}
 	
-	// Add loading="lazy" to images
-	$content = preg_replace( '/<img(.*?)src=/i', '<img$1loading="lazy" src=', $content );
+	// Check if image already has loading attribute
+	if ( strpos( $content, 'loading=' ) !== false ) {
+		return $content;
+	}
+	
+	// Add loading="lazy" to images that don't have it
+	$content = preg_replace( '/<img((?![^>]*loading=)[^>]*)>/i', '<img$1 loading="lazy">', $content );
 	
 	return $content;
 }
@@ -177,27 +207,63 @@ add_action( 'pre_get_posts', 'maupassant_cache_post_queries' );
  * Minify HTML output
  */
 function maupassant_minify_html( $buffer ) {
-	if ( is_admin() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
+	// Safety checks
+	if ( empty( $buffer ) || is_admin() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
 		return $buffer;
 	}
 	
-	// Remove HTML comments (except IE conditionals)
-	$buffer = preg_replace( '/<!--(?!\s*(?:\[if [^\]]+]|<!|>))(?:(?!-->).)*-->/s', '', $buffer );
+	// Check if buffer is valid HTML
+	if ( stripos( $buffer, '<html' ) === false ) {
+		return $buffer;
+	}
 	
-	// Remove whitespace
+	// Protect pre, code, script, style, and textarea tags
+	$protected = array();
+	$buffer = preg_replace_callback(
+		'/<(pre|code|script|style|textarea)[^>]*>.*?<\/\1>/is',
+		function( $matches ) use ( &$protected ) {
+			$placeholder = '<!--PROTECTED_' . count( $protected ) . '-->';
+			$protected[] = $matches[0];
+			return $placeholder;
+		},
+		$buffer
+	);
+	
+	// Remove HTML comments (except IE conditionals)
+	$buffer = preg_replace( '/<!--(?!\s*(?:\[if [^\]]+]|<!|>|PROTECTED))(?:(?!-->).)*-->/s', '', $buffer );
+	
+	// Remove whitespace (but preserve single spaces)
 	$buffer = preg_replace( '/\s+/', ' ', $buffer );
 	$buffer = preg_replace( '/>\s+</', '><', $buffer );
 	
-	return $buffer;
+	// Restore protected content
+	foreach ( $protected as $index => $content ) {
+		$buffer = str_replace( '<!--PROTECTED_' . $index . '-->', $content, $buffer );
+	}
+	
+	return trim( $buffer );
 }
 
 /**
  * Enable HTML minification (optional - can be enabled via filter)
  */
 function maupassant_enable_html_minification() {
-	if ( apply_filters( 'maupassant_enable_html_minification', false ) ) {
-		ob_start( 'maupassant_minify_html' );
+	// Only enable if explicitly requested via filter
+	if ( ! apply_filters( 'maupassant_enable_html_minification', false ) ) {
+		return;
 	}
+	
+	// Check if output buffering is already active
+	if ( ob_get_level() > 0 ) {
+		return;
+	}
+	
+	// Check if headers have been sent
+	if ( headers_sent() ) {
+		return;
+	}
+	
+	ob_start( 'maupassant_minify_html' );
 }
 add_action( 'template_redirect', 'maupassant_enable_html_minification', 1 );
 
@@ -234,12 +300,12 @@ add_action( 'init', 'maupassant_disable_embeds', 9999 );
  * Optimize heartbeat API
  */
 function maupassant_optimize_heartbeat( $settings ) {
-	// Slow down or disable on frontend
-	if ( ! is_admin() ) {
+	// Only disable on frontend if explicitly enabled
+	if ( ! is_admin() && apply_filters( 'maupassant_disable_frontend_heartbeat', true ) ) {
 		wp_deregister_script( 'heartbeat' );
-	} else {
+	} elseif ( is_admin() ) {
 		// Slow down in admin
-		$settings['interval'] = 60; // 60 seconds
+		$settings['interval'] = apply_filters( 'maupassant_heartbeat_interval', 60 );
 	}
 	return $settings;
 }
