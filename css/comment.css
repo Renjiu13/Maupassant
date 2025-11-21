@@ -144,4 +144,212 @@ textarea.textarea {
     font-size: 14px;
     background: #fdfdfd !important;
     color: #555;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+textarea.textarea:focus,
+#comment-form input[type="text"]:focus,
+#comment-form input[type="email"]:focus,
+#comment-form input[type="url"]:focus {
+    border-color: #272727;
+    box-shadow: 0 0 5px rgba(39, 39, 39, 0.1);
+    outline: none;
+}
+
+/* Character counter */
+.comment-char-counter {
+    font-size: 12px;
+    color: #999;
+    text-align: right;
+    margin-top: 5px;
+    transition: color 0.3s ease;
+}
+
+.comment-char-counter.warning {
+    color: #ff9800;
+}
+
+.comment-char-counter.error {
+    color: #f44336;
+    font-weight: bold;
+}
+
+/* Comment messages */
+.comment-message {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.comment-message-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.comment-message-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.comment-message-info {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+/* Field validation errors */
+.field-error {
+    color: #f44336;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+#comment-form input.error,
+#comment-form textarea.error {
+    border-color: #f44336;
+}
+
+/* Load more comments button */
+.load-more-comments {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 30px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.load-more-comments:hover {
+    background: #272727;
+    border-color: #272727;
+    color: #fff;
+}
+
+/* Comment threading improvements */
+.comment .children {
+    margin-left: 30px;
+    padding-left: 20px;
+    border-left: 2px solid #e0e0e0;
+}
+
+.comment .children .comment {
+    background: #fafafa;
+}
+
+/* Comment author highlight */
+.bypostauthor > .comment-body {
+    background: #fffbf0;
+    border-left: 3px solid #ffc107;
+    padding-left: 15px;
+}
+
+/* Avatar improvements */
+.comment-author .avatar {
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.comment-author .avatar:hover {
+    transform: scale(1.1);
+}
+
+/* Reply link improvements */
+.comment-list li .reply a {
+    color: #272727;
+    text-decoration: none;
+    padding: 4px 12px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.comment-list li .reply a:hover {
+    background: #272727;
+    color: #fff;
+    border-color: #272727;
+}
+
+/* Comment meta improvements */
+.comment-meta {
+    margin-bottom: 10px;
+}
+
+.comment-meta a {
+    transition: color 0.3s ease;
+}
+
+.comment-meta a:hover {
+    color: #272727;
+}
+
+/* Responsive improvements */
+@media screen and (max-width: 768px) {
+    #comment-form .comment-form-author,
+    #comment-form .comment-form-email {
+        width: 100%;
+        float: none;
+        margin-left: 0;
+    }
+    
+    #comment-form .comment-form-email {
+        margin-top: 12px;
+    }
+    
+    .comment .children {
+        margin-left: 15px;
+        padding-left: 10px;
+    }
+    
+    .comment-author .avatar {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Loading state */
+button.submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Smooth animations */
+.comment-list li {
+    transition: background-color 0.3s ease;
+}
+
+.comment-list li:hover {
+    background-color: #fafafa;
+}
+
+/* Accessibility improvements */
+#comment-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+#comment-form input:focus,
+#comment-form textarea:focus {
+    outline: 2px solid #272727;
+    outline-offset: 2px;
+}
+
+/* Cancel reply link */
+#cancel-comment-reply-link {
+    color: #999;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+#cancel-comment-reply-link:hover {
+    color: #272727;
 } 

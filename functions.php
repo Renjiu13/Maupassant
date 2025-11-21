@@ -99,9 +99,15 @@ function maupassant_enqueue_scripts() {
 	// 复制代码按钮脚本
 	wp_enqueue_script('copy-code', get_template_directory_uri() . '/js/copy-code.js', array(), '1.0', true);
 	
-	// 只在需要时加载评论回复脚本
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-		wp_enqueue_script( 'comment-reply' );
+	// 只在需要时加载评论相关脚本
+	if ( is_singular() && comments_open() ) {
+		// 评论回复脚本
+		if ( get_option( 'thread_comments' ) ) {
+			wp_enqueue_script( 'comment-reply' );
+		}
+		
+		// 评论增强功能脚本
+		wp_enqueue_script('comment-enhancements', get_template_directory_uri() . '/js/comment-enhancements.js', array('jquery'), '1.0', true);
 	}
 }
 
@@ -114,18 +120,28 @@ function maupassant_enqueue_styles() {
 	// 添加版本号以便缓存控制
 	$theme_version = wp_get_theme()->get('Version');
 	
+	// Critical CSS - load first
 	wp_enqueue_style( 'normalize', get_template_directory_uri() . '/css/normalize.css', array(), '8.0.1' );
-	wp_enqueue_style( 'maupassant-style', get_stylesheet_uri(), array(), $theme_version );
-	wp_enqueue_style('back-to-top', get_template_directory_uri() . '/css/back-to-top.css', array(), '1.1');
-	wp_enqueue_style('maupassant-menu-fix', get_template_directory_uri() . '/css/menu-fix.css', array(), '1.1');
+	wp_enqueue_style( 'maupassant-style', get_stylesheet_uri(), array( 'normalize' ), $theme_version );
+	
+	// Additional styles
+	wp_enqueue_style( 'back-to-top', get_template_directory_uri() . '/css/back-to-top.css', array(), '1.1' );
+	wp_enqueue_style( 'maupassant-menu-fix', get_template_directory_uri() . '/css/menu-fix.css', array(), '1.1' );
+	wp_enqueue_style( 'footer-fix', get_template_directory_uri() . '/css/footer-fix.css', array(), '1.1' );
+	
 	// 确保site-logo.css最后加载，优先级最高
-	wp_enqueue_style('site-logo', get_template_directory_uri() . '/css/site-logo.css', array(), '1.1');
+	wp_enqueue_style( 'site-logo', get_template_directory_uri() . '/css/site-logo.css', array(), '1.1' );
 }
 
 add_action( 'wp_enqueue_scripts', 'maupassant_enqueue_styles' );
 
 require get_template_directory() . '/inc/general-settings.php';
 require get_template_directory() . '/inc/template-functions.php';
+require get_template_directory() . '/inc/comment-enhancements.php';
+require get_template_directory() . '/inc/performance-optimizations.php';
+require get_template_directory() . '/inc/seo-optimizations.php';
+require get_template_directory() . '/inc/accessibility-improvements.php';
+require get_template_directory() . '/inc/security-enhancements.php';
 
 /**
  * 修改归档小工具的日期格式，使月份显示为两位数（例如：2025 年 06 月）
