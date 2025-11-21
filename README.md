@@ -138,7 +138,6 @@ maupassant/
 ├── inc/                      # PHP 模块
 │   ├── general-settings.php # 通用设置
 │   ├── template-functions.php   # 模板函数
-│   ├── performance-optimizations.php  # 性能优化
 │   ├── seo-optimizations.php    # SEO 优化
 │   ├── accessibility-improvements.php # 可访问性
 │   ├── security-enhancements.php    # 安全增强

@@ -152,11 +152,10 @@ add_filter( 'maupassant_excerpt_length', function() {
 
 主题包含以下优化模块（位于 `inc/` 目录）：
 
-1. **performance-optimizations.php** - 性能优化
-2. **seo-optimizations.php** - SEO 优化
-3. **accessibility-improvements.php** - 可访问性
-4. **security-enhancements.php** - 安全增强
-5. **comment-enhancements.php** - 评论增强
+1. **seo-optimizations.php** - SEO 优化
+2. **accessibility-improvements.php** - 可访问性
+3. **security-enhancements.php** - 安全增强
+4. **comment-enhancements.php** - 评论增强
 
 ### 禁用特定模块
 
@@ -328,7 +327,6 @@ maupassant/
 ├── inc/                    # PHP 模块
 │   ├── general-settings.php
 │   ├── template-functions.php
-│   ├── performance-optimizations.php
 │   ├── seo-optimizations.php
 │   ├── accessibility-improvements.php
 │   ├── security-enhancements.php

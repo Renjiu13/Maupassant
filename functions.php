@@ -139,28 +139,19 @@ add_action( 'wp_enqueue_scripts', 'maupassant_enqueue_styles' );
 require get_template_directory() . '/inc/general-settings.php';
 require get_template_directory() . '/inc/template-functions.php';
 
-// 加载增强功能模块（如果遇到问题，可以注释掉相应的行）
-// 评论功能增强
+// 加载增强功能模块
 if ( file_exists( get_template_directory() . '/inc/comment-enhancements.php' ) ) {
 	require get_template_directory() . '/inc/comment-enhancements.php';
 }
 
-// 性能优化
-if ( file_exists( get_template_directory() . '/inc/performance-optimizations.php' ) ) {
-	require get_template_directory() . '/inc/performance-optimizations.php';
-}
-
-// SEO 优化
 if ( file_exists( get_template_directory() . '/inc/seo-optimizations.php' ) ) {
 	require get_template_directory() . '/inc/seo-optimizations.php';
 }
 
-// 可访问性改进
 if ( file_exists( get_template_directory() . '/inc/accessibility-improvements.php' ) ) {
 	require get_template_directory() . '/inc/accessibility-improvements.php';
 }
 
-// 安全增强
 if ( file_exists( get_template_directory() . '/inc/security-enhancements.php' ) ) {
 	require get_template_directory() . '/inc/security-enhancements.php';
 }
