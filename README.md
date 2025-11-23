@@ -7,7 +7,7 @@
 
 一个简洁、优雅、高性能的 WordPress 主题，移植自 Typecho 的 Maupassant 主题（作者：Cho），并经过全面优化升级。
 
-![Maupassant Theme Preview](screenshot.png)
+![Maupassant Theme Preview](https://img.alicdn.com/imgextra/i3/3776889809/O1CN01Y22z4c2MKa7E1maDb_!!3776889809.png)
 
 ---
 
